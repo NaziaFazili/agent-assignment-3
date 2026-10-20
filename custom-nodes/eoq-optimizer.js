@@ -74,12 +74,27 @@ function annualDemand(salesForSku) {
  *       and dividing by zero holding cost is meaningless.)
  */
 function eoq(D, S, H) {
-  // TODO [medium] — LO-2: classical optimization
-  throw new Error("TODO [medium]: implement eoq()");
+  // LO-2: classical optimization
+   if (D <= 0 || H <= 0 || S < 0) {
+    return 0;
+  }
+
+  return Math.round(Math.sqrt((2 * D * S) / H));
 }
 
-// ---- TODO #2 — assumption-violation detection -----------------------------
+// ----  #2 — assumption-violation detection -----------------------------
+// Helper: calculate the average of a list of numbers.
+  function average(values) {
+    if (values.length === 0) return 0;
 
+    let total = 0;
+
+    for (const value of values) {
+      total += value;
+    }
+
+    return total / values.length;
+  }
 /**
  * EOQ assumes:
  *   (a) demand is roughly constant
@@ -109,17 +124,92 @@ function eoq(D, S, H) {
  *       trigger multiple flags — that's expected and useful downstream.
  */
 function detectViolations(inv, salesSeries) {
-  // TODO [hard] — LO-4: knowing when classical models fail
-  throw new Error("TODO [hard]: implement detectViolations()");
+  //  knowing when classical models fail
+    // Store warning messages for this product.
+  const flags = [];
+
+  // Get the sales numbers from oldest month to newest month.
+  const sales = salesSeries.map(r => Number(r.units_sold));
+
+  
+  // 1. Check for a sudden sales increase.
+  // We need 12 months: the latest 3 and the previous 9.
+  if (sales.length >= 12) {
+    const recentAverage = average(sales.slice(-3));
+    const previousAverage = average(sales.slice(-12, -3));
+
+    // If recent sales are more than 2.5 times the previous average,
+    // the product may have a viral spike.
+    if (
+      previousAverage > 0 &&
+      recentAverage > previousAverage * 2.5
+    ) {
+      flags.push("viral_spike");
+    }
+  }
+
+  // 2. Check whether sales are declining.
+  // Compare the first 3 months with the latest 3 months.
+  if (sales.length >= 6) {
+    const firstAverage = average(sales.slice(0, 3));
+    const recentAverage = average(sales.slice(-3));
+
+    // If recent sales are less than half the original average,
+    // sales may be declining.
+    if (
+      firstAverage > 0 &&
+      recentAverage < firstAverage * 0.5
+    ) {
+      flags.push("declining");
+    }
+  }
+
+  // 3. Check for a slow-selling product.
+  // If annual demand is less than 60 units, add a warning.
+  const demand = annualDemand(salesSeries);
+
+  if (demand < 60) {
+    flags.push("low_velocity");
+  }
+
+  // 4. Check whether sales vary a lot from month to month.
+  // Low CV → sales are relatively steady. High CV → sales fluctuate significantly.
+  const mean = average(sales);
+  let variance = 0;
+
+  for (const units of sales) {
+    variance += (units - mean) ** 2;
+  }
+
+  if (sales.length > 0) {
+    variance = variance / sales.length;
+  }
+
+  // CV measures how much sales vary compared with their average.
+  const cv = mean > 0 ? Math.sqrt(variance) / mean : 0;
+
+  // If delivery takes more than 28 days AND sales vary a lot,
+  // add a warning because replenishment may be risky.
+  const leadTime = Number(inv.lead_time_days);
+
+  if (leadTime > 28 && cv > 0.5) {
+    flags.push("long_lead_time");
+  }
+
+  // Return all warnings found for this product.
+  return flags;
+  
 }
 
 // ---- Main loop (provided) -------------------------------------------------
 
 const { inventory, sales } = partition(all);
+//This groups sales records by product SKU
 const salesBySku = sales.reduce((acc, r) => {
   (acc[r.sku] = acc[r.sku] || []).push(r);
   return acc;
 }, {});
+//This visits each SKU group and sorts its sales records by month, from earliest to latest.
 for (const sku of Object.keys(salesBySku)) {
   salesBySku[sku].sort((a, b) => a.month.localeCompare(b.month));
 }

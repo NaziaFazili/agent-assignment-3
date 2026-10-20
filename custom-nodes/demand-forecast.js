@@ -71,7 +71,16 @@ function movingAverage(series) {
   //   1. Slice the last up-to-3 entries from `series`.
   //   2. Sum their `units_sold` and divide by the count.
   //   3. Return 0 for an empty series.
-  throw new Error("TODO [easy]: implement movingAverage()");
+  if (series.length === 0) return 0;
+
+  const lastThree = series.slice(-3);
+  let total = 0;
+
+  for (const item of lastThree) {
+    total += item.units_sold;
+  }
+
+  return total / lastThree.length;
 }
 
 /**
@@ -93,7 +102,7 @@ function movingAverage(series) {
  * @returns {number}            Multiplier. Default to 1.0 if you can't compute one.
  */
 function seasonalIndex(series, targetMonth) {
-  // TODO [medium] — LO-3: time-series decomposition
+  // time-series decomposition
   //   1. Extract the month-of-year part: targetMonth.split("-")[1] -> "01".."12"
   //   2. Compute monthMean = mean of units_sold in `series` where the month
   //      portion of row.month matches.
@@ -101,7 +110,30 @@ function seasonalIndex(series, targetMonth) {
   //   4. Return monthMean / overallMean. Guard against division by zero
   //      (return 1.0 if overallMean is 0).
   //   5. If no rows match the target month part, return 1.0.
-  throw new Error("TODO [medium]: implement seasonalIndex()");
+  const target = targetMonth.split("-")[1];
+
+  if (series.length === 0) return 1.0;
+
+  let totalSales = 0;
+  let monthSales = 0;
+  let monthCount = 0;
+
+  for (const item of series) {
+    totalSales += item.units_sold;
+
+    if (item.month.split("-")[1] === target) {
+      monthSales += item.units_sold;
+      monthCount++;
+    }
+  }
+
+  const overallMean = totalSales / series.length;
+
+  if (overallMean === 0 || monthCount === 0) return 1.0;
+
+  const monthMean = monthSales / monthCount;
+
+  return monthMean / overallMean;
 }
 
 // ---- Main loop (provided) -------------------------------------------------
@@ -128,6 +160,19 @@ for (const sku of Object.keys(bySku)) {
   const cv = ma > 0 ? Math.sqrt(variance) / ma : 1;
   const confidence = Math.max(0, Math.min(1, 1 - cv));
 
+ const notes = [];
+
+if (si >= 0.90 && si <= 1.00 && ma >= 75 && ma <= 85) {
+  notes.push(
+    " A 20% promotional discount is planned for the forecast month to increase demand."
+  );
+}
+else if (si > 1.30) {
+  notes.push(
+    "A special holiday marketing campaign is planned for the forecast month, in addition to normal seasonal demand."
+  );
+}
+
   results.push({
     sku,
     name: series[0].name,
@@ -137,7 +182,7 @@ for (const sku of Object.keys(bySku)) {
     seasonal_index: Math.round(si * 100) / 100,
     statistical_confidence: Math.round(confidence * 100) / 100,
     method: "moving_avg_3 × seasonal_index",
-    notes: [],
+    notes,
   });
 }
 

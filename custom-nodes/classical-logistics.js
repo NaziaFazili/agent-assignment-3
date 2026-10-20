@@ -65,8 +65,47 @@ const options  = $('Read Shipping JSON').all().map(i => ({ type: "option", ...i.
  * the LLM branch, not because we couldn't afford the optimal search.
  */
 function pickCheapestFeasible(req, options) {
-  // TODO [hard] — LO-2: classical search baselines
-  throw new Error("TODO [hard]: implement pickCheapestFeasible()");
+  
+  // Step 1: Keep only carriers that meet all 5 requirements.
+  const feasible = options.filter(option => {
+
+  let canShipGoods = true;
+  // If the goods are perishable, check carrier support.
+  if (req.perishable === true) {
+    canShipGoods =
+      String(option.supports_perishable).toLowerCase() === "true";
+  }
+
+  // Keep the carrier only if all requirements are met.
+  return (
+    option.origin_region === req.origin_region &&
+    option.destination_region === req.dest_region &&
+    Number(option.transit_days) <= req.deadline_days &&
+    Number(option.max_weight_kg) >= req.weight_kg &&
+    canShipGoods
+  );
+});
+  // Step 2: If the filtered list is empty, return null .
+  if (feasible.length === 0) {
+    return null;
+  }
+
+  // Step 3: Calculate the total shipping cost for each eligible carrier.
+  const choices = feasible.map(option => ({
+    ...option,
+    total_cost_usd: req.weight_kg * Number(option.cost_per_kg)
+  }));
+
+  // Step 4: Return the carrier with the lowest total cost.
+  let cheapest = choices[0];
+
+ for (const option of choices) {
+   if (option.total_cost_usd < cheapest.total_cost_usd) {
+     cheapest = option;
+   }
+ }
+
+return cheapest;
 }
 
 // ---- Main loop (provided) -------------------------------------------------
