@@ -86,3 +86,6 @@ EOQ gives a misleading answer for SKU-013 (Wired Earbuds) because it assumes dem
 
 4. Why is supplier scoring an LLM job and EOQ a classical job? What would change if I asked you to swap them?
 Supplier scoring uses an LLM because it can compare supplier performance, explain strengths and weaknesses, and recommend improvements. EOQ uses a classical algorithm because it follows a fixed mathematical formula and needs accurate calculations.
+
+## Demo video
+https://www.loom.com/share/7cb7a0c2a635426ebfb98dfdd927611a
