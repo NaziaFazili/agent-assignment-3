@@ -4,24 +4,22 @@
 
 ## Algorithm comparison
 ### 1. SKU-012:
-    Classical Baseline Forecast: 82 units
-    The classical algorithm predicted 82 units using the three-month moving average (83 units) multiplied by the seasonal index (0.99). Since the seasonal index is close to 1, there is no significant seasonal change in demand. The statistical confidence is high at 0.97, suggesting the historical sales pattern is relatively stable.The output also includes a note about a planned 20% promotional discount.
+Classical Baseline Forecast: 82 units
+The classical algorithm predicted 82 units using the three-month moving average (83 units) multiplied by the seasonal index (0.99). Since the seasonal index is close to 1, there is no significant seasonal change in demand. The statistical confidence is high at 0.97, suggesting the historical sales pattern is relatively stable.The output also includes a note about a planned 20% promotional discount.
 
-    LLM-Revised Forecast: 98 units
-    The LLM increased the forecast from 82 to 98 units, an increase of 19.51%. The adjustment was based on a planned 20% promotional discount for Bluetooth Buds which was included in the notes. The LLM reasoned that the discount could attract more customers and increase sales. 
+LLM-Revised Forecast: 98 units
+The LLM increased the forecast from 82 to 98 units, an increase of 19.51%. The adjustment was based on a planned 20% promotional discount for Bluetooth Buds which was included in the notes. The LLM reasoned that the discount could attract more customers and increase sales. 
 
-    Which Forecast Would I Trust?
-    I would lean toward the LLM-revised forecast because the classical algorithm does not account for the upcoming promotion in its calculation.
+I would lean toward the LLM-revised forecast because the classical algorithm does not account for the upcoming promotion in its calculation.
 
 ### 2. SKU-007 — Wool Gloves:
-    Classical Baseline Forecast: 354 units
-    The classical algorithm predicted 354 units using the three-month moving average (376.7) multiplied by the seasonal index (0.94). The statistical confidence is very low at 0.25, indicating that the forecast may not be reliable due to inconsistent sales patterns.
+Classical Baseline Forecast: 354 units
+The classical algorithm predicted 354 units using the three-month moving average (376.7) multiplied by the seasonal index (0.94). The statistical confidence is very low at 0.25, indicating that the forecast may not be reliable due to inconsistent sales patterns.
 
-    LLM-Revised Forecast: 354 units
-    The LLM kept the forecast unchanged because no additional promotions or market events, were provided. Although it recognized the low statistical confidence, it did not have enough information to justify an adjustment.
+LLM-Revised Forecast: 354 units
+The LLM kept the forecast unchanged because no additional promotions or market events, were provided. Although it recognized the low statistical confidence, it did not have enough information to justify an adjustment.
 
-    Which Forecast Would I Trust?
-    I would use the classical forecast as a starting point since the LLM did not identify any reason to change it.
+I would use the classical forecast as a starting point since the LLM did not identify any reason to change it.
 
 ## EOQ assumption analysis
 
